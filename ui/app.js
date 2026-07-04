@@ -10,6 +10,9 @@ const resultCard = document.getElementById("result-card");
 const resultLinks = document.getElementById("result-links");
 const languageBar = document.getElementById("language-bar");
 const signalState = document.getElementById("signal-state");
+const modelPreview = document.getElementById("model-preview");
+const previewEmpty = document.getElementById("preview-empty");
+const previewStage = document.getElementById("preview-stage");
 
 const stages = ["upload", "crop", "blender", "glb"];
 
@@ -47,7 +50,24 @@ function selectedFile() {
 
 function updateFilePill() {
   const file = selectedFile();
-  filePill.textContent = file ? `${file.name} • ${(file.size / 1024 / 1024).toFixed(2)} MB` : "No image selected";
+  filePill.textContent = file ? `${file.name} - ${(file.size / 1024 / 1024).toFixed(2)} MB` : "No image selected";
+}
+
+function resetPreview() {
+  modelPreview.removeAttribute("src");
+  modelPreview.removeAttribute("poster");
+  previewEmpty.hidden = false;
+  previewStage.classList.remove("is-ready");
+}
+
+function loadPreview(data) {
+  modelPreview.src = data.downloadUrl;
+  modelPreview.poster = data.faceTextureUrl;
+  modelPreview.cameraOrbit = "20deg 74deg 2.9m";
+  modelPreview.fieldOfView = "26deg";
+  modelPreview.jumpCameraToGoal();
+  previewEmpty.hidden = true;
+  previewStage.classList.add("is-ready");
 }
 
 dropZone.addEventListener("dragover", (event) => {
@@ -89,6 +109,7 @@ function renderResult(data) {
     resultLinks.appendChild(anchor);
   });
   resultCard.hidden = false;
+  loadPreview(data);
 }
 
 form.addEventListener("submit", async (event) => {
@@ -100,6 +121,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   resultCard.hidden = true;
+  resetPreview();
   convertButton.disabled = true;
   convertButton.textContent = "Building...";
   setBar("busy", "Working");
@@ -140,9 +162,12 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     clearStages();
     setBar("idle", "Error");
+    resetPreview();
     setLog(String(error.message || error));
   } finally {
     convertButton.disabled = false;
     convertButton.textContent = "Build GLB";
   }
 });
+
+resetPreview();

@@ -62,6 +62,7 @@ The UI gives you:
 
 - drag and drop upload
 - animated pipeline status
+- live in-page `.glb` preview with orbit controls
 - conversion logs
 - download links for the `.glb`, face texture, and `.blend`
 

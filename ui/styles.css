@@ -391,7 +391,14 @@ h2 {
   margin-top: 22px;
   padding: 24px 28px;
   display: grid;
-  gap: 18px;
+  gap: 22px;
+}
+
+.result-copy {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
 }
 
 .result-links {
@@ -409,6 +416,87 @@ h2 {
   background: rgba(255, 255, 255, 0.045);
 }
 
+.preview-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.preview-hint {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.preview-stage {
+  position: relative;
+  min-height: 420px;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 187, 122, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+}
+
+.preview-stage::before {
+  content: "";
+  position: absolute;
+  inset: auto 10% 4% 10%;
+  height: 44px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.45), transparent 72%);
+  filter: blur(10px);
+  z-index: 0;
+}
+
+.preview-stage.is-ready::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 179, 106, 0.18);
+  pointer-events: none;
+}
+
+.preview-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 32px;
+  z-index: 1;
+}
+
+.preview-empty-title {
+  display: block;
+  font-family: "Palatino Linotype", "Book Antiqua", serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.preview-empty-copy {
+  display: block;
+  max-width: 32ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.model-preview {
+  width: 100%;
+  min-height: 420px;
+  --poster-color: transparent;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 179, 106, 0.10), transparent 24%),
+    radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.04), transparent 30%);
+}
+
 @media (max-width: 960px) {
   .hero,
   .studio-grid {
@@ -417,6 +505,12 @@ h2 {
 
   .hero-copy {
     min-height: auto;
+  }
+
+  .result-copy,
+  .preview-header {
+    align-items: start;
+    flex-direction: column;
   }
 }
 
@@ -444,6 +538,11 @@ h2 {
 
   .language-bar span {
     min-height: 56px;
+  }
+
+  .preview-stage,
+  .model-preview {
+    min-height: 320px;
   }
 }
 
