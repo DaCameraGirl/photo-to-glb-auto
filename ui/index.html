@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Photo To GLB Studio</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <div class="backdrop backdrop-a" aria-hidden="true"></div>
+    <div class="backdrop backdrop-b" aria-hidden="true"></div>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Automatic portrait conversion</p>
+          <h1>Turn one photo into a ready-made GLB avatar.</h1>
+          <p class="lede">
+            Drop in a JPG or PNG. The studio crops the face texture, drives Blender headless,
+            and exports a stylized 3D character without manual editing.
+          </p>
+        </div>
+        <div class="signal-panel">
+          <div class="signal-header">
+            <span>Studio language bar</span>
+            <span class="signal-state" id="signal-state">Idle</span>
+          </div>
+          <div class="language-bar idle" id="language-bar" aria-label="Pipeline stages">
+            <span>JPG / PNG</span>
+            <span>FACE TEXTURE</span>
+            <span>BLENDER</span>
+            <span>GLB</span>
+          </div>
+          <p class="signal-note">
+            One visual band tracks the whole conversion path so the README and the app speak the same language.
+          </p>
+        </div>
+      </section>
+
+      <section class="studio-grid">
+        <form class="drop-card" id="convert-form">
+          <label class="drop-zone" id="drop-zone" for="image-input">
+            <input id="image-input" name="image" type="file" accept=".jpg,.jpeg,.png,image/png,image/jpeg" hidden />
+            <span class="drop-label">Drop a portrait here</span>
+            <span class="drop-subtitle">or click to choose a JPG or PNG</span>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Character name</span>
+              <input id="name-input" name="name" type="text" placeholder="Chase" value="Chase" />
+            </label>
+          </div>
+
+          <div class="file-pill" id="file-pill">No image selected</div>
+
+          <button class="convert-button" id="convert-button" type="submit">Build GLB</button>
+        </form>
+
+        <aside class="status-card">
+          <div class="status-block">
+            <p class="mini-label">Pipeline</p>
+            <ul class="stage-list" id="stage-list">
+              <li data-stage="upload">Upload source photo</li>
+              <li data-stage="crop">Build face texture</li>
+              <li data-stage="blender">Run Blender headless</li>
+              <li data-stage="glb">Export final GLB</li>
+            </ul>
+          </div>
+
+          <div class="status-block">
+            <p class="mini-label">Run log</p>
+            <pre class="log-panel" id="log-panel">Studio ready.</pre>
+          </div>
+        </aside>
+      </section>
+
+      <section class="result-card" id="result-card" hidden>
+        <div>
+          <p class="eyebrow">Output</p>
+          <h2>Your GLB is ready.</h2>
+        </div>
+        <div class="result-links" id="result-links"></div>
+      </section>
+    </main>
+    <script src="/ui/app.js"></script>
+  </body>
+</html>
