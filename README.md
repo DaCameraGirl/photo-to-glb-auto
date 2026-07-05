@@ -13,6 +13,14 @@
   <img src="https://img.shields.io/badge/GLB-184054?style=for-the-badge&labelColor=FFB36A&color=184054" alt="GLB" />
 </p>
 
+## Live Preview
+
+The published Pages link opens the studio UI here:
+
+`https://dacameragirl.github.io/photo-to-glb-auto/`
+
+That Pages site is a visual preview of the app shell. Real conversion still runs locally through the Python + Blender server started by `.\run-ui.ps1`.
+
 ## What It Is
 
 `Photo To GLB Studio` turns a single `.jpg` or `.png` into a stylized `.glb` avatar automatically.

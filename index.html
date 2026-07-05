@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=./ui/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Photo To GLB Studio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at top left, rgba(219, 126, 74, 0.2), transparent 30%),
+          radial-gradient(circle at 82% 16%, rgba(84, 173, 220, 0.16), transparent 28%),
+          linear-gradient(180deg, #06131f 0%, #030b12 100%);
+        color: #eff3f6;
+        font-family: "Bahnschrift", "Trebuchet MS", sans-serif;
+      }
+
+      .card {
+        width: min(520px, 100%);
+        padding: 28px;
+        border-radius: 24px;
+        border: 1px solid rgba(190, 214, 226, 0.18);
+        background: rgba(13, 29, 39, 0.92);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-family: "Palatino Linotype", "Book Antiqua", serif;
+        font-size: clamp(2rem, 5vw, 3rem);
+        line-height: 0.98;
+      }
+
+      p {
+        margin: 0;
+        color: #c6d6de;
+        line-height: 1.6;
+      }
+
+      a {
+        color: #ffb36a;
+      }
+    </style>
+    <script>
+      window.location.replace("./ui/");
+    </script>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Opening Photo To GLB Studio</h1>
+      <p>If the redirect does not happen automatically, open <a href="./ui/">the studio UI</a>.</p>
+    </main>
+  </body>
+</html>

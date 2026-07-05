@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Photo To GLB Studio</title>
-    <link rel="stylesheet" href="/ui/styles.css" />
+    <link rel="stylesheet" href="styles.css" />
     <script
       type="module"
       src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"
@@ -56,6 +56,7 @@
           </div>
 
           <div class="file-pill" id="file-pill">No image selected</div>
+          <p class="surface-note" id="surface-note" hidden></p>
 
           <button class="convert-button" id="convert-button" type="submit">Build GLB</button>
         </form>
@@ -111,6 +112,6 @@
         </div>
       </section>
     </main>
-    <script src="/ui/app.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>

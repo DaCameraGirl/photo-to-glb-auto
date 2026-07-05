@@ -3,6 +3,7 @@ const imageInput = document.getElementById("image-input");
 const nameInput = document.getElementById("name-input");
 const dropZone = document.getElementById("drop-zone");
 const filePill = document.getElementById("file-pill");
+const surfaceNote = document.getElementById("surface-note");
 const convertButton = document.getElementById("convert-button");
 const logPanel = document.getElementById("log-panel");
 const stageList = document.getElementById("stage-list");
@@ -13,6 +14,7 @@ const signalState = document.getElementById("signal-state");
 const modelPreview = document.getElementById("model-preview");
 const previewEmpty = document.getElementById("preview-empty");
 const previewStage = document.getElementById("preview-stage");
+const isGitHubPagesPreview = window.location.hostname.endsWith("github.io");
 
 const stages = ["upload", "crop", "blender", "glb"];
 
@@ -53,6 +55,24 @@ function updateFilePill() {
   filePill.textContent = file ? `${file.name} - ${(file.size / 1024 / 1024).toFixed(2)} MB` : "No image selected";
 }
 
+function setGitHubPagesPreview() {
+  imageInput.disabled = true;
+  nameInput.disabled = true;
+  convertButton.disabled = true;
+  convertButton.textContent = "Local Conversion Only";
+  convertButton.classList.add("showcase");
+  dropZone.classList.add("is-disabled");
+  dropZone.setAttribute("aria-disabled", "true");
+  if (surfaceNote) {
+    surfaceNote.hidden = false;
+    surfaceNote.innerHTML =
+      'GitHub Pages is showing the studio shell only. Run <code>.\\\\run-ui.ps1</code> locally for real photo-to-GLB conversion.';
+  }
+  clearStages();
+  setBar("idle", "Preview");
+  setLog("GitHub Pages preview loaded.\nRun .\\run-ui.ps1 locally to convert a photo with Blender.");
+}
+
 function resetPreview() {
   modelPreview.removeAttribute("src");
   modelPreview.removeAttribute("poster");
@@ -71,15 +91,18 @@ function loadPreview(data) {
 }
 
 dropZone.addEventListener("dragover", (event) => {
+  if (isGitHubPagesPreview) return;
   event.preventDefault();
   dropZone.classList.add("drag-over");
 });
 
 dropZone.addEventListener("dragleave", () => {
+  if (isGitHubPagesPreview) return;
   dropZone.classList.remove("drag-over");
 });
 
 dropZone.addEventListener("drop", (event) => {
+  if (isGitHubPagesPreview) return;
   event.preventDefault();
   dropZone.classList.remove("drag-over");
   if (!event.dataTransfer.files.length) return;
@@ -114,6 +137,10 @@ function renderResult(data) {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (isGitHubPagesPreview) {
+    setGitHubPagesPreview();
+    return;
+  }
   const file = selectedFile();
   if (!file) {
     setLog("Choose a JPG or PNG before starting the build.");
@@ -171,3 +198,6 @@ form.addEventListener("submit", async (event) => {
 });
 
 resetPreview();
+if (isGitHubPagesPreview) {
+  setGitHubPagesPreview();
+}

@@ -63,8 +63,11 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         route = parsed.path
-        if route in {"/", "/index.html"}:
+        if route in {"/", "/index.html", "/ui", "/ui/"}:
             self._send_file(UI_ROOT / "index.html")
+            return
+        if route in {"/styles.css", "/app.js"}:
+            self._send_file(UI_ROOT / route.lstrip("/"))
             return
         if route.startswith("/ui/"):
             self._send_file(ROOT / route.lstrip("/"))
