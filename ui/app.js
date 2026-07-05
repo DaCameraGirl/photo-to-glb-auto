@@ -223,24 +223,31 @@ async function buildClientAvatar(file, characterName) {
   addBox(avatar, "ShoeR", [0.19, 0.09, 0.3], [0.12, -0.03, 0.07], "#edf2f5");
   addBox(avatar, "Hood", [0.35, 0.32, 0.16], [0, 1.42, -0.12], "#111c29");
 
-  const head = addSphere(avatar, "Head", 0.18, [0, 1.63, 0], [0.92, 0.84, 1.08], skinMaterial);
+  const faceTexture = new THREE.CanvasTexture(textureCanvas);
+  faceTexture.colorSpace = THREE.SRGBColorSpace;
+  faceTexture.needsUpdate = true;
+  const faceMaterial = new THREE.MeshStandardMaterial({ map: faceTexture, roughness: 0.9 });
+
+  // Box head with the photo mapped onto only the front (+Z) face, via BoxGeometry's
+  // per-face material array [+X, -X, +Y, -Y, +Z, -Z]. Keeps the face fixed to the
+  // head's own surface instead of a separate flat plane that reads as a floating,
+  // tilted card once the camera moves off dead-center.
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.33, 0.3, 0.32), [
+    skinMaterial,
+    skinMaterial,
+    skinMaterial,
+    skinMaterial,
+    faceMaterial,
+    skinMaterial,
+  ]);
+  head.name = "Head";
+  head.position.set(0, 1.63, 0);
   head.rotation.x = -0.04;
+  avatar.add(head);
+
   addSphere(avatar, "EarL", 0.04, [-0.16, 1.61, 0], [0.7, 1.0, 0.8], skinMaterial);
   addSphere(avatar, "EarR", 0.04, [0.16, 1.61, 0], [0.7, 1.0, 0.8], skinMaterial);
   addSphere(avatar, "HairCap", 0.17, [0, 1.72, -0.01], [1.0, 0.72, 0.85], hairMaterial);
-
-  const faceTexture = new THREE.CanvasTexture(textureCanvas);
-  faceTexture.colorSpace = THREE.SRGBColorSpace;
-  faceTexture.flipY = false;
-  faceTexture.needsUpdate = true;
-
-  const facePlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.24, 0.3),
-    new THREE.MeshStandardMaterial({ map: faceTexture, roughness: 0.9 })
-  );
-  facePlane.name = "FaceProjection";
-  facePlane.position.set(0, 1.62, 0.155);
-  avatar.add(facePlane);
 
   const glbBlob = await exportGlb(scene);
   const glbUrl = URL.createObjectURL(glbBlob);
