@@ -19,8 +19,8 @@
           <p class="eyebrow">Automatic portrait conversion</p>
           <h1>Turn one photo into a ready-made GLB avatar.</h1>
           <p class="lede">
-            Drop in a JPG or PNG. The studio crops the face texture, drives Blender headless,
-            and exports a stylized 3D character without manual editing.
+            Drop in a JPG or PNG. The studio crops the face texture, builds a stylized 3D character,
+            and exports a GLB without sending your photo to a server.
           </p>
         </div>
         <div class="signal-panel">
@@ -35,7 +35,7 @@
             <span>GLB</span>
           </div>
           <p class="signal-note">
-            One visual band tracks the whole conversion path so the README and the app speak the same language.
+            The public site runs in your browser. The local desktop path still supports Blender-based exports.
           </p>
         </div>
       </section>
@@ -67,7 +67,7 @@
             <ul class="stage-list" id="stage-list">
               <li data-stage="upload">Upload source photo</li>
               <li data-stage="crop">Build face texture</li>
-              <li data-stage="blender">Run Blender headless</li>
+              <li data-stage="blender">Build avatar mesh</li>
               <li data-stage="glb">Export final GLB</li>
             </ul>
           </div>
@@ -112,6 +112,6 @@
         </div>
       </section>
     </main>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

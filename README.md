@@ -19,7 +19,9 @@ The published Pages link opens the studio UI here:
 
 `https://dacameragirl.github.io/photo-to-glb-auto/`
 
-That Pages site is a visual preview of the app shell. Real conversion still runs locally through the Python + Blender server started by `.\run-ui.ps1`.
+That Pages site now runs a browser-side `.jpg/.png -> .glb` export flow directly on the page.
+
+The local Python + Blender server started by `.\run-ui.ps1` is still available when you want the desktop pipeline and `.blend` output.
 
 ## What It Is
 
