@@ -225,7 +225,6 @@ async function buildClientAvatar(file, characterName) {
 
   const faceTexture = new THREE.CanvasTexture(textureCanvas);
   faceTexture.colorSpace = THREE.SRGBColorSpace;
-  faceTexture.flipY = false;
   faceTexture.needsUpdate = true;
   const faceMaterial = new THREE.MeshStandardMaterial({ map: faceTexture, roughness: 0.9 });
 
