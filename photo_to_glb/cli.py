@@ -6,11 +6,11 @@ from pathlib import Path
 
 from PIL import Image
 from tsr.system import TSR
+from .image_prep import prepare_image
 
 
 def _slugify(value: str) -> str:
     import re
-
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     return slug or "avatar"
 
@@ -46,26 +46,6 @@ def _load_model() -> TSR:
     return model
 
 
-def _load_image(input_path: Path) -> Image.Image:
-    print(f"Loading image: {input_path}")
-    img = Image.open(input_path).convert("RGB")
-    print(f"Image size: {img.size[0]}x{img.size[1]}")
-    return img
-
-
-def _reconstruct_mesh(model: TSR, img: Image.Image, name: str):
-    print(f"Reconstructing 3D mesh for '{name}'...")
-    mesh = model.reconstruct(img, has_texture=True)
-    print("3D reconstruction complete.")
-    return mesh
-
-
-def _export_glb(mesh, output_path: Path):
-    print(f"Exporting GLB to: {output_path}")
-    mesh.export(str(output_path))
-    print("GLB export complete.")
-
-
 def main() -> int:
     args = parse_args()
     input_path = Path(args.input).expanduser().resolve()
@@ -76,10 +56,25 @@ def main() -> int:
         return 1
 
     try:
+        # 1. Preprocess image for 3D model
+        prep_path = output_path.with_suffix(".prep.png")
+        prepared = prepare_image(input_path, prep_path)
+
+        # 2. Load model
         model = _load_model()
-        img = _load_image(input_path)
-        mesh = _reconstruct_mesh(model, img, name)
-        _export_glb(mesh, output_path)
+
+        # 3. Load prepared image
+        img = Image.open(prepared).convert("RGB")
+
+        # 4. Reconstruct 3D mesh
+        print(f"Reconstructing 3D mesh for '{name}'...")
+        mesh = model.reconstruct(img, has_texture=True)
+        print("3D reconstruction complete.")
+
+        # 5. Export GLB
+        print(f"Exporting GLB to: {output_path}")
+        mesh.export(str(output_path))
+        print("GLB export complete.")
     except Exception as exc:
         print(f"Error during 3D generation: {exc}", file=sys.stderr)
         return 1
@@ -95,4 +90,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+))
 
