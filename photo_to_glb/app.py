@@ -30,7 +30,6 @@ def _slugify(value: str) -> str:
 
 class PhotoToGlbHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args) -> None:
-        # Keep the server quiet in the console
         return
 
     def _json(self, status: HTTPStatus, payload: dict[str, object]) -> None:
@@ -69,22 +68,18 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         route = parsed.path
 
-        # UI entrypoints
         if route in {"/", "/index.html", "/ui", "/ui/"}:
             self._send_file(UI_ROOT / "index.html")
             return
 
-        # Static UI assets
         if route in {"/styles.css", "/app.js"}:
             self._send_file(UI_ROOT / route.lstrip("/"))
             return
 
-        # Any other file under ui/
         if route.startswith("/ui/"):
             self._send_file(ROOT / route.lstrip("/"))
             return
 
-        # Serve generated runs (GLBs, logs, etc.)
         if route.startswith("/runs/"):
             self._send_file(ROOT / route.lstrip("/"))
             return
@@ -192,4 +187,5 @@ def run_server(port: int = 8787) -> None:
 if __name__ == "__main__":
     port = int(os.getenv("PHOTO_TO_GLB_PORT", "8787"))
     run_server(port=port)
+
 
