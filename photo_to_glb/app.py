@@ -9,7 +9,7 @@ from datetime import datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +30,7 @@ def _slugify(value: str) -> str:
 
 class PhotoToGlbHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args) -> None:
+        # Keep the server quiet in the console
         return
 
     def _json(self, status: HTTPStatus, payload: dict[str, object]) -> None:
@@ -44,41 +45,55 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
         if not path.exists() or not path.is_file():
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
             return
-        self.path = str(path)
+
         with path.open("rb") as handle:
             data = handle.read()
+
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Length", str(len(data)))
-        if path.suffix.lower() == ".glb":
+
+        suffix = path.suffix.lower()
+        if suffix == ".glb":
             self.send_header("Content-Type", "model/gltf-binary")
-        elif path.suffix.lower() == ".css":
+        elif suffix == ".css":
             self.send_header("Content-Type", "text/css; charset=utf-8")
-        elif path.suffix.lower() == ".js":
+        elif suffix == ".js":
             self.send_header("Content-Type", "application/javascript; charset=utf-8")
         else:
             self.send_header("Content-Type", self.guess_type(str(path)))
+
         self.end_headers()
         self.wfile.write(data)
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         route = parsed.path
+
+        # UI entrypoints
         if route in {"/", "/index.html", "/ui", "/ui/"}:
             self._send_file(UI_ROOT / "index.html")
             return
+
+        # Static UI assets
         if route in {"/styles.css", "/app.js"}:
             self._send_file(UI_ROOT / route.lstrip("/"))
             return
+
+        # Any other file under ui/
         if route.startswith("/ui/"):
             self._send_file(ROOT / route.lstrip("/"))
             return
+
+        # Serve generated runs (GLBs, logs, etc.)
         if route.startswith("/runs/"):
             self._send_file(ROOT / route.lstrip("/"))
             return
+
         self.send_error(HTTPStatus.NOT_FOUND, "Not found")
 
     def do_POST(self) -> None:
-        if urlparse(self.path).path != "/api/convert":
+        parsed = urlparse(self.path)
+        if parsed.path != "/api/convert":
             self.send_error(HTTPStatus.NOT_FOUND, "Not found")
             return
 
@@ -104,16 +119,19 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
         original_name = Path(upload.filename)
         suffix = original_name.suffix.lower()
         if suffix not in ALLOWED_SUFFIXES:
-            self._json(HTTPStatus.BAD_REQUEST, {"error": "Only .jpg, .jpeg, and .png are supported."})
+            self._json(
+                HTTPStatus.BAD_REQUEST,
+                {"error": "Only .jpg, .jpeg, and .png are supported."},
+            )
             return
 
         character_name = form.getfirst("name", "Photo Avatar").strip() or "Photo Avatar"
+
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         run_dir = RUNS_ROOT / f"web_{stamp}_{_slugify(character_name)}"
         input_dir = run_dir / "input"
-        work_dir = run_dir / "work"
         input_dir.mkdir(parents=True, exist_ok=True)
-        work_dir.mkdir(parents=True, exist_ok=True)
+        run_dir.mkdir(parents=True, exist_ok=True)
 
         input_path = input_dir / f"source{suffix}"
         output_path = run_dir / f"{_slugify(character_name)}.glb"
@@ -131,9 +149,8 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
             str(output_path),
             "--name",
             character_name,
-            "--work-dir",
-            str(work_dir),
         ]
+
         result = subprocess.run(
             command,
             cwd=str(ROOT),
@@ -155,9 +172,8 @@ class PhotoToGlbHandler(SimpleHTTPRequestHandler):
         payload = {
             "name": character_name,
             "downloadUrl": f"/runs/{output_path.relative_to(RUNS_ROOT).as_posix()}",
-            "faceTextureUrl": f"/runs/{(work_dir / 'face_texture.png').relative_to(RUNS_ROOT).as_posix()}",
-            "blendUrl": f"/runs/{(work_dir / f'{_slugify(character_name)}.blend').relative_to(RUNS_ROOT).as_posix()}",
             "stdout": result.stdout.strip(),
+            "mode": "real-3d-reconstruction",
         }
         self._json(HTTPStatus.OK, payload)
 
@@ -176,3 +192,4 @@ def run_server(port: int = 8787) -> None:
 if __name__ == "__main__":
     port = int(os.getenv("PHOTO_TO_GLB_PORT", "8787"))
     run_server(port=port)
+
