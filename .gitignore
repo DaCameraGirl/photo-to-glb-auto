@@ -1,5 +1,5 @@
-__pycache__/
-*.pyc
-.venv/
-runs/*
-!runs/.gitkeep
+node_modules
+dist
+.DS_Store
+*.log
+.vscode
