@@ -22,7 +22,7 @@ const ADJUSTMENT_CONTROLS: [keyof ImageAdjustments, string, string, number, numb
   ['grain', '🎞️ Grain', 'Film-style noise. Adds a gritty, analog texture for character.', 0, 100],
 ]
 
-function randomAvatar(base: AvatarParams): AvatarParams {
+function randomAvatar(_base: AvatarParams): AvatarParams {
   const cols = ['#184054', '#c0392b', '#27ae60', '#8e44ad', '#e67e22', '#2c3e50', '#e91e63', '#00bcd4', '#ffaa00']
   return {
     headScale: 0.82 + Math.random() * 0.42,
