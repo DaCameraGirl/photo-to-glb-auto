@@ -1,11 +1,12 @@
 import { useMemo, useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
-import { AvatarParams } from './types'
+import { AvatarParams, FacePlacement } from './types'
 
 interface Props {
   params: AvatarParams
   faceTextureUrl: string | null
+  facePlacement?: FacePlacement
   meltTrigger?: number  // increment to re-trigger melt animation
 }
 
@@ -23,6 +24,11 @@ const meltFragmentShader = `
   uniform vec3 skinColor;
   uniform float melt;        // 0.0 = fully skin, 1.0 = fully photo
   uniform float time;
+  // face placement controls – let the user position/scale/rotate the photo on the avatar face
+  uniform float faceScale;
+  uniform float faceOffsetX;
+  uniform float faceOffsetY;
+  uniform float faceRotation; // radians
   varying vec2 vUv;
 
   // 2D noise
@@ -54,24 +60,35 @@ const meltFragmentShader = `
 
     // Only show photo on the front-facing hemisphere of the head
     // Sphere UVs: u = longitude (0=back, 0.25=right, 0.5=front, 0.75=left), v = latitude (0=bottom, 0.5=equator, 1=top)
-    // We want the face centered on the front, covering roughly the front 50% of the sphere horizontally
-    // and the middle 60% vertically (forehead to chin)
-    float faceU = fract(uv.x + 0.0); // 0.5 = front center in default sphere UVs, but three.js orients differently, tune below
-    // Actually three.js sphere UVs: u=0 at +X, wraps CCW looking down +Y, so front (+Z) is at u=0.25
-    // Let's remap so the photo centers on the front face
     float u = fract(uv.x + 0.25); // shift so front faces forward
-    float faceMaskU = smoothstep(0.72, 0.68, abs(u - 0.5)) * 2.0; // fade at sides, keep center sharp
+    float faceMaskU = smoothstep(0.72, 0.68, abs(u - 0.5)) * 2.0;
     faceMaskU = clamp(faceMaskU, 0.0, 1.0);
     float faceMaskV = smoothstep(0.08, 0.18, uv.y) * smoothstep(0.92, 0.72, uv.y);
     float faceMask = faceMaskU * faceMaskV;
 
-    // Sample the face texture – crop to face region and scale to fit the masked area
-    // Map the face-masked UV region back to 0-1 texture space
-    vec2 texUv = vec2(
-      clamp((u - 0.28) / 0.44, 0.0, 1.0),
-      clamp((uv.y - 0.18) / 0.54, 0.0, 1.0)
+    // Map mesh UVs to face texture UVs – with user-controllable placement
+    // Base face region on the mesh: u in [0.28, 0.72], v in [0.18, 0.72]
+    vec2 faceUv = vec2(
+      (u - 0.28) / 0.44,
+      (uv.y - 0.18) / 0.54
     );
-    vec3 photoColor = texture2D(faceTex, texUv).rgb;
+
+    // Apply user face placement transform: scale, offset, rotation
+    // Transform around center (0.5, 0.5)
+    faceUv -= vec2(0.5);
+    // scale (faceScale > 1 = zoom in, < 1 = zoom out)
+    faceUv /= faceScale;
+    // rotate
+    float c = cos(faceRotation);
+    float s = sin(faceRotation);
+    faceUv = vec2(
+      faceUv.x * c - faceUv.y * s,
+      faceUv.x * s + faceUv.y * c
+    );
+    // offset (in texture UV space, 0.01 = ~1% of photo width/height)
+    faceUv += vec2(0.5) + vec2(faceOffsetX * 0.01, -faceOffsetY * 0.01);
+
+    vec3 photoColor = texture2D(faceTex, clamp(faceUv, 0.0, 1.0)).rgb;
 
     // Melt / dissolve effect – gooey dripping edge that sweeps top-to-bottom
     float n = fbm(uv * 8.0 + time * 0.15);
@@ -95,7 +112,7 @@ const meltFragmentShader = `
   }
 `
 
-export function MeltAvatar({ params, faceTextureUrl, meltTrigger = 0 }: Props) {
+export function MeltAvatar({ params, faceTextureUrl, facePlacement = { scale: 1, offsetX: 0, offsetY: 0, rotation: 0 }, meltTrigger = 0 }: Props) {
   const groupRef = useRef<THREE.Group>(null)
 
   // Gentle idle sway – faces the camera, no constant spin
@@ -154,6 +171,10 @@ export function MeltAvatar({ params, faceTextureUrl, meltTrigger = 0 }: Props) {
         skinColor: { value: new THREE.Color(params.skinColor) },
         melt: { value: 0 },
         time: { value: 0 },
+        faceScale: { value: facePlacement.scale },
+        faceOffsetX: { value: facePlacement.offsetX },
+        faceOffsetY: { value: facePlacement.offsetY },
+        faceRotation: { value: facePlacement.rotation * Math.PI / 180 },
       },
       vertexShader: meltVertexShader,
       fragmentShader: meltFragmentShader,
@@ -168,12 +189,16 @@ export function MeltAvatar({ params, faceTextureUrl, meltTrigger = 0 }: Props) {
     }
   }, [params.skinColor, faceMeltMat])
 
-  // drive melt + time uniforms every frame
+  // drive melt + time + face placement uniforms every frame
   useFrame((state) => {
     const m = faceMeltMat as any
     if (m.uniforms) {
       m.uniforms.melt.value = meltRef.current.value
       m.uniforms.time.value = state.clock.elapsedTime
+      if (m.uniforms.faceScale) m.uniforms.faceScale.value = facePlacement.scale
+      if (m.uniforms.faceOffsetX) m.uniforms.faceOffsetX.value = facePlacement.offsetX
+      if (m.uniforms.faceOffsetY) m.uniforms.faceOffsetY.value = facePlacement.offsetY
+      if (m.uniforms.faceRotation) m.uniforms.faceRotation.value = facePlacement.rotation * Math.PI / 180
     }
   })
 

@@ -26,6 +26,20 @@ export const DEFAULT_ADJUSTMENTS: ImageAdjustments = {
   grain: 0,
 }
 
+export interface FacePlacement {
+  scale: number      // 0.5 .. 2.5   (1.0 = default fit)
+  offsetX: number    // -50 .. +50   (- = left, + = right)
+  offsetY: number    // -50 .. +50   (- = down, + = up)
+  rotation: number   // -180 .. +180 degrees
+}
+
+export const DEFAULT_FACE_PLACEMENT: FacePlacement = {
+  scale: 1.0,
+  offsetX: 0,
+  offsetY: 0,
+  rotation: 0,
+}
+
 export interface AvatarParams {
   headScale: number
   bodyWidth: number

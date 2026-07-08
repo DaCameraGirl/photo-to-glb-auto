@@ -4,7 +4,7 @@ import { OrbitControls, Environment } from '@react-three/drei'
 import { MeltAvatar } from './Avatar'
 import { processImage } from './imageProcess'
 import { exportGLB } from './exportGLB'
-import { DEFAULT_ADJUSTMENTS, DEFAULT_AVATAR, ImageAdjustments, AvatarParams, SKIN_TONES, ACCESSORIES } from './types'
+import { DEFAULT_ADJUSTMENTS, DEFAULT_AVATAR, DEFAULT_FACE_PLACEMENT, ImageAdjustments, AvatarParams, FacePlacement, SKIN_TONES, ACCESSORIES } from './types'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -43,6 +43,7 @@ export default function App() {
   const [adj, setAdj] = useState<ImageAdjustments>({ ...DEFAULT_ADJUSTMENTS })
   const [processedImage, setProcessedImage] = useState<string | null>(null)
   const [avatar, setAvatar] = useState<AvatarParams>({ ...DEFAULT_AVATAR })
+  const [facePlacement, setFacePlacement] = useState<FacePlacement>({ ...DEFAULT_FACE_PLACEMENT })
   const [isProcessing, setIsProcessing] = useState(false)
   const [exporting, setExporting] = useState(false)
 
@@ -81,7 +82,7 @@ export default function App() {
   const doExport = async () => {
     setExporting(true)
     try {
-      const blob = await exportGLB(avatar, processedImage)
+      const blob = await exportGLB(avatar, processedImage, facePlacement)
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = 'melt-avatar.glb'
@@ -241,9 +242,10 @@ export default function App() {
               <details className="guide-box">
                 <summary>🫠 How does the "melting" actually work?</summary>
                 <div className="guide-inner">
-                  <p>Your tuned photo is loaded as a Three.js texture and applied to the face sphere of a procedural avatar mesh. The avatar is built from primitives (spheres, cylinders, boxes) — a clean, stylized look that works great for games, VR, social profiles, and 3D scenes.</p>
-                  <p><strong>Mutation Madness 🎲</strong> randomizes every avatar property at once: head size, body width/height, limb thickness, skin tone, eye color, hair color, outfit color, and accessories (glasses, cap, headphones, halo). Hit it as many times as you want — it's pure chaos energy.</p>
-                  <p>You can also tweak everything manually with the sliders below. All changes are live — the 3D preview updates instantly.</p>
+                  <p>Your tuned photo is loaded as a Three.js texture and projected onto the face sphere of a procedural avatar mesh. The avatar is built from primitives (spheres, cylinders, boxes) — a clean, stylized look that works great for games, VR, social profiles, and 3D scenes.</p>
+                  <p><strong>🖼️ Face Photo Placement</strong> — right below this box, you'll find 4 sliders that let you position your photo <em>on the avatar's face</em>, just like Blender's UV editor: <strong>Face Zoom</strong> (make the photo bigger/smaller on the head), <strong>Face X Offset</strong> (slide left/right), <strong>Face Y Offset</strong> (slide up/down), and <strong>Face Rotation</strong> (tilt to match your photo angle). Every change is live in the 3D preview → – no re-render wait, no Blender, no installs.</p>
+                  <p><strong>Mutation Madness 🎲</strong> randomizes every <em>avatar body</em> property at once: head size, body width/height, limb thickness, skin tone, eye color, hair color, outfit color, and accessories (glasses, cap, headphones, halo). Your carefully positioned face photo <strong>stays exactly where you put it</strong> – Mutation Madness only randomizes the body, not the face placement. Hit it as many times as you want — pure chaos energy.</p>
+                  <p>You can tweak everything manually with the sliders below. All changes are live — the 3D preview updates instantly.</p>
                 </div>
               </details>
 
@@ -251,7 +253,54 @@ export default function App() {
                 🎲 Mutation Madness — Randomize Everything!
               </button>
 
-              <div className="avatar-controls">
+              {/* Face Photo Placement – lets you position/scale/rotate the uploaded photo on the avatar face, just like Blender's UV editor */}
+              <div className="face-place-panel">
+                <h3>🖼️ Face Photo Placement</h3>
+                <p className="muted" style={{ marginBottom: 12, fontSize: '0.88rem' }}>
+                  Your uploaded photo is mapped onto the avatar's face in 3D. Use these controls to make it fit perfectly — just like positioning a texture in Blender's UV editor, but live in your browser, no installs needed.
+                </p>
+                <div className="avatar-controls">
+                  <div className="ctrl-group">
+                    <label title="Zoom the face photo in/out on the avatar head. Higher = bigger/crop tighter. Lower = smaller/more of the original photo visible.">🔍 Face Zoom <span>{facePlacement.scale.toFixed(2)}×</span></label>
+                    <input type="range" min="0.5" max="2.5" step="0.01"
+                      value={facePlacement.scale}
+                      onChange={e => setFacePlacement(f => ({ ...f, scale: Number(e.target.value) }))} />
+                  </div>
+                  <div className="ctrl-group">
+                    <label title="Move the photo left/right on the avatar face. Negative = left, positive = right. Use this if the face is off-center in your photo.">↔️ Face X Offset <span>{facePlacement.offsetX > 0 ? '+' : ''}{facePlacement.offsetX.toFixed(0)}</span></label>
+                    <input type="range" min="-50" max="50" step="1"
+                      value={facePlacement.offsetX}
+                      onChange={e => setFacePlacement(f => ({ ...f, offsetX: Number(e.target.value) }))} />
+                  </div>
+                  <div className="ctrl-group">
+                    <label title="Move the photo up/down on the avatar face. Negative = down, positive = up. Nudge this until the eyes and mouth line up with the avatar's eye/mouth position.">↕️ Face Y Offset <span>{facePlacement.offsetY > 0 ? '+' : ''}{facePlacement.offsetY.toFixed(0)}</span></label>
+                    <input type="range" min="-50" max="50" step="1"
+                      value={facePlacement.offsetY}
+                      onChange={e => setFacePlacement(f => ({ ...f, offsetY: Number(e.target.value) }))} />
+                  </div>
+                  <div className="ctrl-group">
+                    <label title="Rotate the face photo on the avatar head. Useful if your source photo is tilted / taken at an angle. -180° to +180°.">🔄 Face Rotation <span>{facePlacement.rotation > 0 ? '+' : ''}{facePlacement.rotation.toFixed(0)}°</span></label>
+                    <input type="range" min="-180" max="180" step="1"
+                      value={facePlacement.rotation}
+                      onChange={e => setFacePlacement(f => ({ ...f, rotation: Number(e.target.value) }))} />
+                  </div>
+                  <div className="ctrl-group full">
+                    <button className="btn" style={{ width: '100%' }}
+                      onClick={() => setFacePlacement({ ...DEFAULT_FACE_PLACEMENT })}>
+                      ↺ Reset face placement
+                    </button>
+                  </div>
+                </div>
+                <p className="muted" style={{ fontSize: '0.82rem', marginTop: 8 }}>
+                  💡 <strong>Tip:</strong> Start with Face Zoom to get the face size right, then use X/Y Offset to center the eyes and mouth. Rotation fixes tilted photos. All changes are live in the 3D preview → — you see the result instantly, no re-render wait.
+                </p>
+              </div>
+
+              <div className="avatar-controls" style={{ marginTop: 24 }}>
+                <div className="ctrl-group full" style={{ opacity: 0.85 }}>
+                  <label style={{ fontWeight: 700 }}>🧍 Avatar Body Sculpting</label>
+                  <p className="muted" style={{ fontSize: '0.82rem', margin: '4px 0 0 0' }}>Adjust the avatar's body proportions, colors, and accessories below.</p>
+                </div>
                 <div className="ctrl-group">
                   <label>Head Size <span>{avatar.headScale.toFixed(2)}</span></label>
                   <input type="range" min="0.75" max="1.35" step="0.01"
@@ -361,7 +410,7 @@ export default function App() {
               <ambientLight intensity={0.7} />
               <directionalLight position={[3, 4, 2]} intensity={1.2} castShadow />
               <directionalLight position={[-2, 2, -2]} intensity={0.4} />
-              <MeltAvatar params={avatar} faceTextureUrl={processedImage} />
+              <MeltAvatar params={avatar} faceTextureUrl={processedImage} facePlacement={facePlacement} />
               <Environment preset="studio" />
               <OrbitControls enablePan={false} minDistance={1.5} maxDistance={5} />
               <gridHelper args={[6, 12]} position={[0, -1.4, 0]} />
