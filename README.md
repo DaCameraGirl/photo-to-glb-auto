@@ -1,138 +1,94 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:06131F,38:0B2330,72:184054,100:DB7E4A&text=Photo%20To%20GLB%20Studio&fontColor=F4F7F9&fontAlignY=38&desc=Automatic%20portrait%20to%20stylized%203D%20avatar%20pipeline&descAlignY=60&descColor=D7E5EC" alt="Photo To GLB Studio banner" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:06131F,38:0B2330,72:184054,100:DB7E4A&text=Photo%20Melt%20Studio&fontColor=F4F7F9&fontAlignY=38&desc=JPG%20%2F%20PNG%20melts%20onto%20a%203D%20avatar%20%E2%80%94%20fully%20in%20your%20browser&descAlignY=60&descColor=D7E5EC" alt="Photo Melt Studio banner" />
 </div>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=18&pause=1100&color=F0F4F6&center=true&vCenter=true&width=960&lines=Drop+in+a+single+JPG+or+PNG.;Build+a+face+texture+automatically.;Run+Blender+headless.;Export+a+ready-made+GLB." alt="Animated summary" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=18&pause=1100&color=F0F4F6&center=true&vCenter=true&width=960&lines=Drop+in+a+JPG+or+PNG.;Tune+11+camera-style+sliders+live.;Watch+your+photo+melt+onto+a+3D+avatar.;Mutation+Madness+%F0%9F%8E%B2+randomizes+everything.;Export+a+ready-made+.glb." alt="Animated summary" />
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/JPG%20%2F%20PNG-06131F?style=for-the-badge&labelColor=DB7E4A&color=06131F" alt="JPG PNG" />
   <img src="https://img.shields.io/badge/Face%20Texture-0B2330?style=for-the-badge&labelColor=FFB36A&color=0B2330" alt="Face Texture" />
-  <img src="https://img.shields.io/badge/Blender-102D3C?style=for-the-badge&labelColor=DB7E4A&color=102D3C" alt="Blender" />
+  <img src="https://img.shields.io/badge/Three.js-102D3C?style=for-the-badge&labelColor=DB7E4A&color=102D3C" alt="Three.js" />
   <img src="https://img.shields.io/badge/GLB-184054?style=for-the-badge&labelColor=FFB36A&color=184054" alt="GLB" />
+  <img src="https://img.shields.io/badge/No%20Blender%20Required-27AE60?style=for-the-badge" alt="No Blender" />
 </p>
 
-## Live Preview
+## 🫠 Live Studio
 
-The published Pages link opens the studio UI here:
+**https://dacameragirl.github.io/photo-to-glb-auto/**
 
-`https://dacameragirl.github.io/photo-to-glb-auto/`
+Fully browser-based. No installs. No server. No Blender.
 
-That Pages site now runs a browser-side `.jpg/.png -> .glb` export flow directly on the page.
-
-The local Python + Blender server started by `.\run-ui.ps1` is still available when you want the desktop pipeline and `.blend` output.
+---
 
 ## What It Is
 
-`Photo To GLB Studio` turns a single `.jpg` or `.png` into a stylized `.glb` avatar automatically.
+**Photo Melt Studio v2** turns any JPG or PNG portrait into a stylized 3D avatar — entirely in your browser.
 
-The visual language of the app is built around one thick studio bar:
-
-- `JPG / PNG`
-- `FACE TEXTURE`
-- `BLENDER`
-- `GLB`
-
-That same sequence drives both the UI and this README.
+Your photo "melts" onto the avatar's face in real time, with 11 camera-style image controls, live Three.js preview, and a chaotic "Mutation Madness" randomizer for avatar features.
 
 ## What It Does
 
-- accepts one portrait image
-- crops and normalizes a face texture automatically
-- runs Blender in background mode
-- projects the face texture onto a generated avatar head
-- exports a `.glb` and keeps the `.blend` source for inspection
+- Accepts any JPG / PNG portrait
+- 11 real-time camera controls: brightness, contrast, saturation, exposure, temperature, tint, highlights, shadows, sharpness, vignette, grain — all via Canvas API, 100% client-side
+- Live Three.js preview — your photo melts onto the avatar face instantly
+- Mutation Madness 🎲 — randomize body proportions, skin tone, eye color, hair, outfit, and accessories in one click
+- Manual avatar sculpting — head size, body width/height, limb thickness, all colors, 5 accessories
+- Export standard `.glb` — works in Blender, Unity, Godot, Spline, WebXR, anywhere GLB is supported
+- Zero backend. Zero uploads. Your photo never leaves your device.
 
-## Important Truth
+## Tech Stack
 
-This repo does **not** claim to reconstruct a perfect real-world 3D scan from one photo.
+- React + TypeScript + Vite
+- Three.js + @react-three/fiber + drei
+- Canvas API (image processing)
+- GLTFExporter (GLB export)
+- GitHub Pages (static deploy)
 
-From a single image, the reliable automatic result is:
+## Local Development
 
-- photo-informed face texture
-- stylized procedural body and head geometry
-- zero manual Blender editing required
-
-## Local Studio UI
-
-Run the browser app:
-
-```powershell
-.\run-ui.ps1
+```bash
+npm install
+npm run dev
 ```
 
-Then open:
+Open http://localhost:5173
 
-```text
-http://127.0.0.1:8787
+Build:
+
+```bash
+npm run build
 ```
 
-The UI gives you:
+Output goes to `dist/`.
 
-- drag and drop upload
-- animated pipeline status
-- live in-page `.glb` preview with orbit controls
-- conversion logs
-- download links for the `.glb`, face texture, and `.blend`
+## Guided UI
 
-## CLI Usage
+The studio uses a verbose, beginner-friendly, step-by-step guided interface inspired by [Bettin2Win](https://github.com/DaCameraGirl/Bettin2Win) — collapsible explainer sections everywhere, plain-English labels, no jargon left unexplained. Every slider tells you what it does.
 
-Install dependencies:
+Four steps:
 
-```powershell
-py -3.11 -m pip install -r requirements.txt
-```
+1. **📷 Upload** — Drag & drop a JPG/PNG
+2. **🎨 Tune Image** — 11 camera-style controls, real-time
+3. **🫠 Melt & Mutate** — Live 3D preview, Mutation Madness, manual sculpting
+4. **⬇️ Export GLB** — One-click download
 
-Run the CLI directly:
+## Privacy
 
-```powershell
-py -3.11 -m photo_to_glb.cli `
-  --input "C:\path\to\photo.png" `
-  --output "C:\path\to\avatar.glb" `
-  --name "Chase"
-```
+Everything runs 100% client-side. No server, no uploads, no tracking. Your photo stays on your machine.
 
-Or use the wrapper:
+## Legacy Blender Pipeline
 
-```powershell
-.\convert.ps1 -InputPath "C:\path\to\photo.png" -OutputPath "C:\path\to\avatar.glb" -Name "Chase"
-```
+The original Python + Blender headless pipeline is archived in `/legacy/`.
 
-## Requirements
-
+That version required:
 - Windows
-- Python `3.11`
-- Blender `5.1`
-- Blender at `C:\Program Files\Blender Foundation\Blender 5.1\blender.exe`
+- Python 3.11
+- Blender 5.1
 
-If Blender is somewhere else, pass `--blender-exe` or set `BLENDER_EXE`.
+If you want the old desktop pipeline with `.blend` output, check the `legacy/` folder.
 
-## Repo Layout
+## License
 
-```text
-photo_to_glb/
-  app.py
-  cli.py
-  image_prep.py
-scripts/
-  build_avatar_blender.py
-ui/
-  index.html
-  styles.css
-  app.js
-runs/
-```
-
-## Output
-
-Every run keeps artifacts under `runs/`:
-
-- uploaded source image
-- `work/face_texture.png`
-- `work/<name>.blend`
-- final `<name>.glb`
-
-## Current Limitation
-
-The body is still procedural and stylized. The current likeness comes mostly from the photo projection, not custom reconstructed geometry.
+MIT
